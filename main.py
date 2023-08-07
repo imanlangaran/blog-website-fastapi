@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from db.session import engine #, Base
-from db.base_model import Base
+from db.base import Base
 
 def create_tables():
     Base.metadata.create_all(bind=engine)
