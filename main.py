@@ -1,3 +1,4 @@
+from core.config import setting
 from fastapi import FastAPI
 from db.session import engine #, Base
 from db.base import Base
@@ -6,7 +7,7 @@ def create_tables():
     Base.metadata.create_all(bind=engine)
 
 def start_app():
-    app = FastAPI()
+    app = FastAPI(title=setting.APP_TITLE, version=setting.APP_VERSION)
     create_tables()
     return app
 
