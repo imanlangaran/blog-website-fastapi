@@ -10,14 +10,14 @@ DATABASE_URL = "sqlite:///./sql_app.db"
 
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 
-# SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
-# def get_db() -> Generator:
-#     try:
-#         db = SessionLocal()
-#         yield db
-#     finally:
-#         db.close()
+def get_db() -> Generator:
+    try:
+        db = SessionLocal()
+        yield db
+    finally:
+        db.close()
 
 
 ####################################################################
