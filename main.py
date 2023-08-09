@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
 
 from core.config import setting
 from db.session import engine  # , Base
@@ -36,4 +37,5 @@ app = start_app()
 
 @app.get("/")
 def home(request: Request):
-    return templates.TemplateResponse("blog/home.html", {"request": request})
+    return RedirectResponse("/blog/")
+    # return templates.TemplateResponse("blog/home.html", {"request": request})
