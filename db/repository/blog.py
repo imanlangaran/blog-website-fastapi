@@ -12,3 +12,6 @@ def create_new_blog(blog:CreateBlog, db:Session, author_id:int):
     db.commit()
     db.refresh(blog)
     return blog
+
+def retreive_blog(id:int, db:Session):
+    return db.query(Blog).filter(Blog.id==id).first()

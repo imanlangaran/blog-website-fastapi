@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Request, Depends, Form, responses, status
 from fastapi.templating import Jinja2Templates
 from typing import Optional
-from sqlalchemy.orm import session
+from sqlalchemy.orm import Session
 
 from db.session import get_db
-from db.repository.blog import list_blogs
+from db.repository.blog import list_blogs, retreive_blog
 from db.models.blog import Blog
 from res_models.blog import CreateBlog
 from db.repository.blog import create_new_blog
@@ -14,7 +14,7 @@ router = APIRouter()
 
 
 @router.get("/blog")
-def home(request: Request, alert: Optional[str] = None, db: session = Depends(get_db)):
+def home(request: Request, alert: Optional[str] = None, db: Session = Depends(get_db)):
     ls_blogs = list_blogs(db=db)
     return templates.TemplateResponse(
         "blog/home.html", {"request": request, "alert": alert, "blogs": ls_blogs}
@@ -26,12 +26,20 @@ def create_blog(request: Request):
     return templates.TemplateResponse("blog/create_blog.html", {"request": request})
 
 
+@router.get("/blog/{id}")
+def blog_detail(request: Request, id: int, db: Session = Depends(get_db)):
+    blog = retreive_blog(id=id, db=db)
+    return templates.TemplateResponse(
+        "blog/detail.html", {"request": request, "blog": blog}
+    )
+
+
 @router.post("/blog/create_new_blog")
 def create_blog(
     request: Request,
     title: str = Form(...),
     content: str = Form(...),
-    db: session = Depends(get_db),
+    db: Session = Depends(get_db),
 ):
     try:
         # author = get_current_user(token=token,db=db)
@@ -48,5 +56,5 @@ def create_blog(
         errors = ["Please Log in to Create New Blog"]
         return templates.TemplateResponse(
             "blog/create_blog.html",
-            {"request": request, "errors": errors, "title": title, "content": content}
+            {"request": request, "errors": errors, "title": title, "content": content},
         )
