@@ -17,3 +17,6 @@ def create_new_user(user: CreateUser, db: Session):
     db.commit()
     db.refresh(user)
     return user
+
+def get_user(email:str, db:Session):
+    return db.query(User).filter(User.email==email).first()

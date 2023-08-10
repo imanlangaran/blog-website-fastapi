@@ -1,5 +1,19 @@
+import os
+from dotenv import load_dotenv
+
+from pathlib import Path
+
+env_path = Path(".") / ".env"
+load_dotenv(env_path)
+
+
 class Setting:
     APP_TITLE = "title of my app"
-    APP_VERSION= "00.00.00"
+    APP_VERSION = "00.00.00"
+
+    SECRET_KEY: str = os.getenv("SECRET_KEY")
+    ALGORITHM = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
 
 setting = Setting()
