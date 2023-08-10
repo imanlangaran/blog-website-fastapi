@@ -1,10 +1,13 @@
-from fastapi import APIRouter, Request, Depends
+from fastapi import APIRouter, Request, Depends, Form, responses, status
 from fastapi.templating import Jinja2Templates
 from typing import Optional
 from sqlalchemy.orm import session
 
 from db.session import get_db
 from db.repository.blog import list_blogs
+from db.models.blog import Blog
+from res_models.blog import CreateBlog
+from db.repository.blog import create_new_blog
 
 templates = Jinja2Templates(directory="templates")
 router = APIRouter()
@@ -16,3 +19,34 @@ def home(request: Request, alert: Optional[str] = None, db: session = Depends(ge
     return templates.TemplateResponse(
         "blog/home.html", {"request": request, "alert": alert, "blogs": ls_blogs}
     )
+
+
+@router.get("/blog/create_new_blog")
+def create_blog(request: Request):
+    return templates.TemplateResponse("blog/create_blog.html", {"request": request})
+
+
+@router.post("/blog/create_new_blog")
+def create_blog(
+    request: Request,
+    title: str = Form(...),
+    content: str = Form(...),
+    db: session = Depends(get_db),
+):
+    try:
+        # author = get_current_user(token=token,db=db)
+        blog = CreateBlog(title=title, content=content)
+        blog = create_new_blog(
+            blog=blog,
+            db=db,
+            author_id=2,
+        )
+        return responses.RedirectResponse(
+            "/blog?alert=Blog Submitted For Review", status_code=status.HTTP_302_FOUND
+        )
+    except Exception as e:
+        errors = ["Please Log in to Create New Blog"]
+        return templates.TemplateResponse(
+            "blog/create_blog.html",
+            {"request": request, "errors": errors, "title": title, "content": content}
+        )
