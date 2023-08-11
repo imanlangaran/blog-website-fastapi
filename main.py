@@ -7,7 +7,8 @@ from core.config import setting
 from db.session import engine  # , Base
 from db.base import Base
 
-from app.base import router
+from app.base import router as app_router
+from apis.base import router as apis_router
 
 
 def create_tables():
@@ -15,7 +16,8 @@ def create_tables():
 
 
 def include_routes(app: FastAPI):
-    app.include_router(router=router)
+    app.include_router(router=app_router)
+    app.include_router(router=apis_router)
 
 
 def config_staticfiles(app: FastAPI):

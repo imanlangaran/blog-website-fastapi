@@ -2,12 +2,14 @@ from fastapi import APIRouter, Request, Depends, Form, responses, status
 from fastapi.templating import Jinja2Templates
 from typing import Optional
 from sqlalchemy.orm import Session
+from fastapi.security.utils import get_authorization_scheme_param
 
 from db.session import get_db
 from db.repository.blog import list_blogs, retreive_blog
 from db.models.blog import Blog
 from res_models.blog import CreateBlog
 from db.repository.blog import create_new_blog
+from apis.v1.route_login import get_current_user
 
 templates = Jinja2Templates(directory="templates")
 router = APIRouter()
@@ -41,13 +43,15 @@ def create_blog(
     content: str = Form(...),
     db: Session = Depends(get_db),
 ):
+    token = request.cookies.get("access_token")
+    _,token = get_authorization_scheme_param(token)
     try:
-        # author = get_current_user(token=token,db=db)
+        author = get_current_user(token=token,db=db)
         blog = CreateBlog(title=title, content=content)
         blog = create_new_blog(
             blog=blog,
             db=db,
-            author_id=2,
+            author_id=author.id,
         )
         return responses.RedirectResponse(
             "/blog?alert=Blog Submitted For Review", status_code=status.HTTP_302_FOUND

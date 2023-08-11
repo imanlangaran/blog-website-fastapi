@@ -8,7 +8,8 @@ from pydantic.error_wrappers import ValidationError
 from db.session import get_db
 from res_models.user import CreateUser
 from db.repository.user import create_new_user
-from core.security import authenticate_user, create_access_token
+from core.security import create_access_token
+from apis.v1.route_login import authenticate_user
 
 templates = Jinja2Templates(directory="templates")
 router = APIRouter()
@@ -65,5 +66,10 @@ def login(
     response = responses.RedirectResponse(
         "/blog?alert=Successfully Logged In", status_code=status.HTTP_302_FOUND
     )
-    response.set_cookie(key="access_token", value=f"Bearer {access_token}", httponly=True)
+    response.set_cookie(
+        key="access_token", value=f"Bearer {access_token}", httponly=True
+    )
     return response
+
+
+# def get_current_user()
