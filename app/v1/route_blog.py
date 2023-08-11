@@ -5,8 +5,9 @@ from sqlalchemy.orm import Session
 from fastapi.security.utils import get_authorization_scheme_param
 
 from db.session import get_db
-from db.repository.blog import list_blogs, retreive_blog
-from db.models.blog import Blog
+from db.repository.blog import list_blogs, retreive_blog, delete_a_blog
+
+# from db.models.blog import Blog
 from res_models.blog import CreateBlog
 from db.repository.blog import create_new_blog
 from apis.v1.route_login import get_current_user
@@ -44,9 +45,9 @@ def create_blog(
     db: Session = Depends(get_db),
 ):
     token = request.cookies.get("access_token")
-    _,token = get_authorization_scheme_param(token)
+    _, token = get_authorization_scheme_param(token)
     try:
-        author = get_current_user(token=token,db=db)
+        author = get_current_user(token=token, db=db)
         blog = CreateBlog(title=title, content=content)
         blog = create_new_blog(
             blog=blog,
@@ -61,4 +62,24 @@ def create_blog(
         return templates.TemplateResponse(
             "blog/create_blog.html",
             {"request": request, "errors": errors, "title": title, "content": content},
+        )
+
+
+@router.get("/blog/delete/{id}")
+def delete_blog(request: Request, id: int, db: Session = Depends(get_db)):
+    token = request.cookies.get("access_token")
+    _, token = get_authorization_scheme_param(token)
+
+    try:
+        author = get_current_user(token=token, db=db)
+        msg = delete_a_blog(id=id, author_id=author.id, db=db)
+        alert = msg.get("msg") or msg.get("error")
+        return responses.RedirectResponse(
+            f"/blog?alert={alert}", status_code=status.HTTP_302_FOUND
+        )
+    except Exception as e:
+        blog = retreive_blog(id=id, db=db)
+        return templates.TemplateResponse(
+            "blog/detail.html",
+            {"request": request, "alert": "Please Login again", "blog": blog},
         )
