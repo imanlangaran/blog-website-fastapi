@@ -1,7 +1,8 @@
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from jose import jwt, JWTError
+from fastapi.security.utils import get_authorization_scheme_param
 
 from db.repository.user import get_user
 from core.security import create_access_token
@@ -47,17 +48,32 @@ def get_current_user(
 ):
     credetials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Incorrect Username or Password"
+        detail="Incorrect Username or Password",
     )
-    
+
     try:
-        payload = jwt.decode(token=token, key=setting.SECRET_KEY, algorithms=[setting.ALGORITHM])
-        username :str = payload.get("sub")
+        payload = jwt.decode(
+            token=token, key=setting.SECRET_KEY, algorithms=[setting.ALGORITHM]
+        )
+        username: str = payload.get("sub")
         if username is None:
             raise credetials_exception
+
+        
     except JWTError:
         raise credetials_exception
     user = get_user(email=username, db=db)
     if user is None:
         raise credetials_exception
+    return user
+
+
+@router.get("/test")
+def test(request: Request, db: Session =Depends(get_db)):
+    token = request.cookies.get("access_token")
+    _, token = get_authorization_scheme_param(token)
+    try:
+        user = get_current_user(token=token, db=db)
+    except Exception:
+        return {"error": "error"}
     return user
