@@ -8,7 +8,7 @@ load_dotenv(env_path)
 
 
 class Setting:
-    APP_TITLE = "title of my app"
+    APP_TITLE = "Blog App"
     APP_VERSION = "00.00.00"
 
     SECRET_KEY: str = os.getenv("SECRET_KEY")
